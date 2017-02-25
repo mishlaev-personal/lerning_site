@@ -11,11 +11,12 @@
 </head>
 <body>
     <div class="site-container">
+        <div>{% nav_courses_list %}</div>
         <nav>
             <a href="{% url 'home_page' %}">Home</a>
             <a href="{% url 'courses:list' %}">Courses</a>
         </nav>
-    <p>Don't miss our latest course, {% newest_course %}</p>
+        <p>Don't miss our latest course, {% newest_course %}</p>
         {% block content %}{% endblock %}
     </div>
 </body>
