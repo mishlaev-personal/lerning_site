@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
+{% load course_extras %}
 
-
-{% block title %}
-    Hello
-{% endblock %}
+{% block title %}Well hello there!{% endblock %}
 
 {% block content %}
-    <h1>Welcome</h1>
+    <div class="row">
+        <h1>Welcome!</h1>
+        <P>Our latest course is {% newest_course %}</P>
+    </div>
 {% endblock %}
