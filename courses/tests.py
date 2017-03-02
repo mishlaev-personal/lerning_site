@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-from .models import Course, Step
+from .models import Course, Text, Quiz
 
 
 class CourseModelTests(TestCase):
@@ -14,6 +14,7 @@ class CourseModelTests(TestCase):
         now = timezone.now()
         self.assertLess(course.created_at, now)
 
+
 class StepModelTests(TestCase):
     def setUp(self):
         self.course = Course.objects.create(
@@ -21,13 +22,23 @@ class StepModelTests(TestCase):
             description="Learn to write RegEx in Python"
         )
 
-    def test_step_creation(self):
-        step = Step.objects.create(
+    def test_text_creation(self):
+        step = Text.objects.create(
             title="Step test",
             description="Step Step Desc",
+            content="jkwrj r eljkn reljn er  erjklnerw lkjn  wegrljknrgw ljknrq glnjr egl jngrwe l nj wegrlnj",
             course=self.course
         )
-        self.assertIn(step, self.course.step_set.all())
+        self.assertIn(step, self.course.text_set.all())
+
+    def test_quiz_creation(self):
+        quiz = Quiz.objects.create(
+            title="Quiz test",
+            description="Quiz Quiz Desc",
+            total_questions=10,
+            course=self.course
+        )
+        self.assertIn(quiz, self.course.quiz_set.all())
 
 
 class CourseViewTests(TestCase):
@@ -40,9 +51,16 @@ class CourseViewTests(TestCase):
             title="Python Regular Expressions",
             description="Learn to write RegEx in Python"
         )
-        self.step = Step.objects.create(
-            title="Step test",
-            description="Step Step Desc",
+        self.text = Text.objects.create(
+            title="Text Title",
+            description="Text Text",
+            content="Text Text njkfvkljfvm;kfvk kmk egkl egwr",
+            course=self.course
+        )
+        self.quiz = Quiz.objects.create(
+            title="Quiz Step Title",
+            description="Quiz Text",
+            total_questions=10,
             course=self.course
         )
 
@@ -61,13 +79,24 @@ class CourseViewTests(TestCase):
         self.assertTemplateUsed(resp, 'courses/course_detail.html')
         self.assertContains(resp, self.course.title)
 
-    def test_step_detail_view(self):
-        resp = self.client.get(reverse('courses:step',
+    def test_text_detail_view(self):
+        resp = self.client.get(reverse('courses:text',
                                        kwargs=
                                        {'course_pk': self.course.pk,
-                                       'step_pk': self.step.pk}
+                                       'step_pk': self.text.pk}
                                        ))
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(self.step, resp.context['step'])
-        self.assertTemplateUsed(resp, 'courses/step_detail.html')
-        self.assertContains(resp, self.step.title)
+        self.assertEqual(self.text, resp.context['step'])
+        self.assertTemplateUsed(resp, 'courses/text_detail.html')
+        self.assertContains(resp, self.text.title)
+
+    def test_quiz_detail_view(self):
+        resp = self.client.get(reverse('courses:quiz',
+                                       kwargs=
+                                       {'course_pk': self.course.pk,
+                                       'step_pk': self.quiz.pk}
+                                       ))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.quiz, resp.context['step'])
+        self.assertTemplateUsed(resp, 'courses/quiz_detail.html')
+        self.assertContains(resp, self.quiz.title)
