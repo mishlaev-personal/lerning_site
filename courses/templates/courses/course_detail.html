@@ -14,9 +14,9 @@
             </div>
 
             <dl>
-                {% for step in course.step_set.all %}
+                {% for step in steps %}
                     <dt>
-                        <a href="{% url 'courses:step' course_pk=course.pk step_pk=step.pk %}">
+                        <a href="{{ step.get_absolute_url }}">
                             {{ step.title }}
                         </a>
                     </dt>
@@ -24,6 +24,9 @@
                     <small><i>Estimated time: {{ step.content|wordcount|time_estimate }}
                         minute{{ step.content|wordcount|time_estimate|pluralize }}
                     </i></small>
+                    {% if not forloop.last %}
+                        <hr/>
+                    {% endif %}
                 {% endfor %}
             </dl>
         </article>

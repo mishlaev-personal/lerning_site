@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Course, Text
+from .models import Course, Text, Quiz
 
 
 class TextInline(admin.StackedInline):
@@ -10,8 +10,8 @@ class TextInline(admin.StackedInline):
 
 class CourseAdmin(admin.ModelAdmin):
     inlines = [TextInline, ]
-    pass
 
 
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Text)
+admin.site.register(Quiz)
