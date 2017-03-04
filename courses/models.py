@@ -72,7 +72,7 @@ class TrueFalseQuestion(Question):
     pass
 
 
-class Answers(models.Model):
+class Answer(models.Model):
     question = models.ForeignKey(Question)
     order = models.IntegerField(default=0)
     text = models.CharField(max_length=255)
