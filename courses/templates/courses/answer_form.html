@@ -2,7 +2,7 @@
 {% load course_extras %}
 
 {% block title %}
-    New Answer | {{ question.prompt }}
+    {{ question|default:"New Answer" }} |
     {{ question.quiz.course.title }} {{ block.super }}
 {% endblock %}
 
@@ -25,11 +25,16 @@
 
 {% block content %}
     <div class="row columns">
-    {{ block.super }}
-    <h1>Add answer</h1>
+        {{ block.super }}
+    </div>
+
+    <div class="row columns"></div>
+        <h1>Answers:</h1>
         <form action="" method="POST">
             {% csrf_token %}
-            {{ form.as_p }}
+            <section>
+                {{ formset }}
+            </section>
             <input type="submit" class="button" value="Save!">
         </form>
     </div>

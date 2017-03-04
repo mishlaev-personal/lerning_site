@@ -35,7 +35,7 @@
             {% for answer in form.instance.answer_set.all %}
                 <div class="callout">{{ answer.text }}</div>
             {% endfor %}
-            <a href="{% url 'courses:create_answer' question_pk=form.instance.pk %}" class="button">Add answer</a>
+            <a href="{% url 'courses:create_answer' question_pk=form.instance.pk %}" class="button">Add answers</a>
         {% endif %}
     </div>
 {% endblock %}

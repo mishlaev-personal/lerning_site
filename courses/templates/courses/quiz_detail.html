@@ -18,7 +18,7 @@
                     <li>
                         <h5>{{ question.prompt }}</h5>
                         {% for answer in question.answer_set.all %}
-                            <div class="callout">{{ answer.text }}</div>
+                            <div class="callout" {% if answer.correct %}style="background-color: #3adb76"{% endif %}>{{ answer.text }}</div>
                         {% endfor %}
                         {% if user.is_authenticated %}
                             <a href="{% url 'courses:edit_question' question_pk=question.pk quiz_pk=step.pk %}">Edit question</a>
