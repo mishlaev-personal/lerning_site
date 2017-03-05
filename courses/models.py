@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 
+
 # Create your models here.
 class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -28,6 +29,7 @@ class Step(models.Model):
 
 class Text(Step):
     content = models.TextField(blank=True, default='')
+    step_type = 'Text'
 
     def get_absolute_url(self):
         return reverse('courses:text', kwargs={
@@ -38,6 +40,7 @@ class Text(Step):
 
 class Quiz(Step):
     total_questions = models.IntegerField(default=4)
+    step_type = 'Quiz'
 
     class Meta:
         verbose_name_plural = "Quizzes"

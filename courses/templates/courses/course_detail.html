@@ -16,14 +16,16 @@
             <dl>
                 {% for step in steps %}
                     <dt>
-                        <a href="{{ step.get_absolute_url }}">
+                        {{ step.step_type }}: <a href="{{ step.get_absolute_url }}">
                             {{ step.title }}
                         </a>
                     </dt>
                     <dd>{{ step.description|markdown_to_html }}</dd>
-                    <small><i>Estimated time: {{ step.content|wordcount|time_estimate }}
+                    {% if step.step_type == 'Text' %}
+                        <small><i>Estimated time: {{ step.content|wordcount|time_estimate }}
                         minute{{ step.content|wordcount|time_estimate|pluralize }}
-                    </i></small>
+                        </i></small>
+                    {% endif %}
                     {% if not forloop.last %}
                         <hr/>
                     {% endif %}
@@ -33,6 +35,10 @@
 
         {% if user.is_authenticated %}
             <hr>
+            <a href="#" class="button">
+                New Text
+            </a>
+
             <a href="{% url 'courses:create_quiz' course_pk=course.id %}" class="button">
                 New Quiz
             </a>

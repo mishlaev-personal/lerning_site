@@ -27,15 +27,44 @@
         <form action="" method="POST">
             {% csrf_token %}
             {{ form.as_p }}
+            {{ formset.management_form }}
+            <table role="grid" class="stack hover" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 10%">Order</th>
+                        <th scope="col" class="text-center">Text</th>
+                        <th scope="col" class="text-center" style="width: 10%">Correct?</th>
+                        <th scope="col" class="text-center" style="width: 10%">Delete?</th>
+                    </tr>
+                </thead>
+                <tbody class="order">
+                    {% for form in formset %}
+                        <tr class="answer-form" {% if form.instance.pk %}item{% else %}new{% endif %}>
+                            <td>{{ form.id }}{{ form.order }}</td>
+                            <td>{{ form.text }}</td>
+                            <td class="text-center">{{ form.correct }}</td>
+                            {% if form.instance.pk %}
+                                <td class="text-center">{{ form.DELETE }}</td>
+                            {% else %}
+                                <td class="text-center"></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
             <input type="submit" class="button" value="Save!">
         </form>
 
-        {% if user.is_authenticated and form.instance.pk %}
-            <hr>
-            {% for answer in form.instance.answer_set.all %}
-                <div class="callout">{{ answer.text }}</div>
-            {% endfor %}
-            <a href="{% url 'courses:create_answer' question_pk=form.instance.pk %}" class="button">Add answers</a>
-        {% endif %}
+{#      We don't need to show all answers anymore, as we have a formset#}
+{#        {% if user.is_authenticated and form.instance.pk %}#}
+{#            <hr>#}
+{#            {% for answer in form.instance.answer_set.all %}#}
+{#                <div class="callout">{{ answer.text }}</div>#}
+{#            {% endfor %}#}
+{#            <a href="{% url 'courses:create_answer' question_pk=form.instance.pk %}" class="button">#}
+{#                Add answers#}
+{#            </a>#}
+{#        {% endif %}#}
     </div>
 {% endblock %}
