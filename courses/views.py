@@ -54,6 +54,50 @@ def quiz_create(request, course_pk):
                                                       'course': course
                                                       })
 
+@login_required
+def quiz_create(request, course_pk):
+    course = get_object_or_404(models.Course, pk=course_pk)
+    form = forms.QuizForm()
+
+    if request.method == 'POST':
+        form = forms.QuizForm(request.POST)
+        if form.is_valid():
+            quiz = form.save(commit=False)
+            quiz.course = course
+            quiz.save()
+            messages.add_message(request, messages.SUCCESS, "Quiz Added!")
+            return HttpResponseRedirect(quiz.get_absolute_url())
+
+        else:
+            messages.add_message(request, messages.ERROR, "Form is not valid!")
+
+    return render(request, 'courses/quiz_form.html', {'form': form,
+                                                      'course': course
+                                                      })
+
+
+@login_required
+def text_create(request, course_pk):
+    course = get_object_or_404(models.Course, pk=course_pk)
+    form = forms.TextForm()
+
+    if request.method == 'POST':
+        form = forms.TextForm(request.POST)
+        if form.is_valid():
+            text = form.save(commit=False)
+            text.course = course
+            text.save()
+            messages.add_message(request, messages.SUCCESS, "Text Added!")
+            return HttpResponseRedirect(text.get_absolute_url())
+
+        else:
+            messages.add_message(request, messages.ERROR, "Form is not valid!")
+
+    return render(request, 'courses/text_form.html', {'form': form,
+                                                      'course': course
+                                                      })
+
+
 
 @login_required
 def quiz_edit(request, course_pk, quiz_pk):
