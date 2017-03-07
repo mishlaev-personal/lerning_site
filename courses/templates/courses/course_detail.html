@@ -7,28 +7,37 @@
     <div class="row columns">
         {{ block.super }}
         <article>
-            <h1 class="">{{ course.title }}</h1>
+            <h1 class="">{{ course.title }}
+            {% if user.is_authenticated %}
+                <b>[{{ viewmode }}]</b>
+            {% endif %}
+            </h1>
 
             <div class="callout secondary">
                 {{ course.description|markdown_to_html }}
             </div>
 
-            <dl>
+            <dl >
                 {% for step in steps %}
-                    <dt>
-                        {{ step.step_type }}: <a href="{{ step.get_absolute_url }}">
-                            {{ step.title }}
-                        </a>
-                    </dt>
-                    <dd>{{ step.description|markdown_to_html }}</dd>
-                    {% if step.step_type == 'Text' %}
-                        <small><i>Estimated time: {{ step.content|wordcount|time_estimate }}
-                        minute{{ step.content|wordcount|time_estimate|pluralize }}
-                        </i></small>
-                    {% endif %}
-                    {% if not forloop.last %}
-                        <hr/>
-                    {% endif %}
+                    <div  {% if user.is_authenticated and step.published == False %}style="background-color: #ffe0d7" {% endif %}>
+                        <dt>
+                            {{ step.step_type }}: <a href="{{ step.get_absolute_url }}">
+                                {{ step.title }}
+                            </a>
+                            {% if user.is_authenticated %}
+                                (Published = {{ step.published  }})
+                            {% endif %}
+                        </dt>
+                        <dd>{{ step.description|markdown_to_html }}</dd>
+                        {% if step.step_type == 'Text' %}
+                            <small><i>Estimated time: {{ step.content|wordcount|time_estimate }}
+                            minute{{ step.content|wordcount|time_estimate|pluralize }}
+                            </i></small>
+                        {% endif %}
+                        {% if not forloop.last %}
+                            <hr/>
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </dl>
         </article>
@@ -42,6 +51,15 @@
             <a href="{% url 'courses:create_quiz' course_pk=course.id %}" class="button">
                 New Quiz
             </a>
+        {% endif %}
+        {% if user.is_authenticated and viewmode == 'userview' %}
+            <hr>
+            <b>Unpublished</b> Steps are hidden<br>
+            <a href="{% url 'courses:detail_admin_view' pk=course.id %}">View Published and Unpublished Steps</a>
+        {% elif user.is_authenticated and viewmode == 'adminview' %}
+            <hr>
+            All <b>Published and Unpublished</b> steps are listed<br>
+            <a href="{% url 'courses:detail' pk=course.id %}">View only Published Steps</a>
         {% endif %}
     </div>
 {% endblock %}

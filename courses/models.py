@@ -10,6 +10,7 @@ class Course(models.Model):
     description = models.TextField()
     teacher = models.ForeignKey(User)
     subject = models.CharField(default='', max_length=100)
+    published = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -20,6 +21,7 @@ class Step(models.Model):
     description = models.TextField()
     order = models.IntegerField(default=0)
     course = models.ForeignKey(Course)
+    published = models.BooleanField(default=False)
     # content = models.TextField(blank=True, default='')
 
     class Meta:
@@ -59,6 +61,7 @@ class Question(models.Model):
     quiz = models.ForeignKey(Quiz)
     order = models.IntegerField(default=0)
     prompt = models.TextField()
+    published = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['order',]
@@ -83,6 +86,8 @@ class Answer(models.Model):
     order = models.IntegerField(default=0)
     text = models.CharField(max_length=255)
     correct = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
+
 
     class Meta:
         ordering = ['order',]

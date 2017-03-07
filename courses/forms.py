@@ -11,6 +11,7 @@ class TextForm(forms.ModelForm):
             'description',
             'order',
             'content',
+            'published',
         ]
 
 
@@ -22,6 +23,7 @@ class QuizForm(forms.ModelForm):
             'description',
             'order',
             'total_questions',
+            'published',
         ]
         # exclude = [
         #     'course',

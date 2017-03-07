@@ -26,6 +26,14 @@
                     </li>
                 </ul>
             </section>
+            <section class="top-bar-right">
+                <form action="{% url 'courses:search' %}" method="GET">
+                    <ul class="menu">
+                        <li><input type="search" name="q"></li>
+                        <li><button type="button" class="secondary small button">Search</button></li>
+                    </ul>
+                </form>
+            </section>
         </nav>
         {% if messages %}
             <ul class="messages">
