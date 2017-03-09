@@ -6,6 +6,7 @@ from courses.models import Course
 
 register = template.Library()
 
+
 @register.simple_tag
 def newest_course():
     ''' Gets the most recent course that was added to the library. '''
@@ -15,7 +16,7 @@ def newest_course():
 @register.inclusion_tag('courses/course_nav.html')
 def nav_courses_list():
     '''Returns dictionary of course to display as nav panel'''
-    courses = Course.objects.filter(published=True)
+    courses = Course.objects.filter(published=True).order_by('-created_at').values('id', 'title')[:5]
     return {'courses': courses}
 
 

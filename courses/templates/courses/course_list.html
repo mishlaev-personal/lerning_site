@@ -7,13 +7,20 @@
     <div class="row columns">
         {{ block.super }}
     </div>
+    <p>Total number of quizes and steps: {{ total.total }}</p>
     <div class="row">
         {%  for course in courses %}
             <div class="small-6 columns">
                 <div class="callout">
                     <h5><a href="{% url 'courses:detail' pk=course.pk %}">{{ course.title }}</a></h5>
+                    by <i><a href="{% url "courses:by_teacher" teacher=course.teacher.username %}">{{ course.teacher.first_name }} {{ course.teacher.last_name }}</a></i>
                     <div class="card-copy">
                         {{ course.description|markdown_to_html|striptags|truncatewords:8 }}
+                        {% if course.total_steps %}
+                            <p><strong>
+                                Steps: {{ course.total_steps }}
+                            </strong></p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

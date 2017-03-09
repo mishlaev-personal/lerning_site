@@ -12,6 +12,7 @@
                 <b>[{{ viewmode }}]</b>
             {% endif %}
             </h1>
+            Course written by <a href="{% url "courses:by_teacher" teacher=course.teacher.username %}">{{ course.teacher.first_name }} {{ course.teacher.last_name }}</a>
 
             <div class="callout secondary">
                 {{ course.description|markdown_to_html }}
@@ -24,9 +25,6 @@
                             {{ step.step_type }}: <a href="{{ step.get_absolute_url }}">
                                 {{ step.title }}
                             </a>
-                            {% if user.is_authenticated %}
-                                (Published = {{ step.published  }})
-                            {% endif %}
                         </dt>
                         <dd>{{ step.description|markdown_to_html }}</dd>
                         {% if step.step_type == 'Text' %}
@@ -38,6 +36,9 @@
                             <hr/>
                         {% endif %}
                     </div>
+                    {% if step.question_set.all %}
+                        Total questions {{ step.question_set.count }}
+                    {% endif %}
                 {% endfor %}
             </dl>
         </article>

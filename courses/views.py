@@ -1,24 +1,51 @@
 from itertools import chain
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.contrib import messages
+from django.db.models import Q, Count, Sum, Case, When
 
 from . import forms
 from . import models
 
 
 def course_list(request):
-    courses = models.Course.objects.filter(published=True)
-    return render(request, 'courses/course_list.html', {'courses': courses})
+    courses = models.Course.objects.filter(
+        published=True
+    ).annotate(
+        total_steps=Count(
+            'text',
+            distinct=True
+        )+Count(
+            'quiz',
+            distinct=True
+        )
+    )
+    total = courses.aggregate(total=Sum('total_steps'))
+    return render(request, 'courses/course_list.html', {
+        'courses': courses,
+        'total': total
+    })
 
 
 def course_detail(request, pk):
-    course = get_object_or_404(models.Course, pk=pk, published=True)
-    steps = sorted(chain(course.text_set.filter(published=True),
-                         course.quiz_set.filter(published=True)
-                         ),
-                   key=lambda step: step.order)
+    try:
+        course = models.Course.objects.prefetch_related(
+            'quiz_set', 'text_set', 'quiz_set__question_set'
+        ).get(pk=pk, published=True)
+    except models.Course.DoesNotExist:
+        raise Http404
+    else:
+        steps = sorted(chain(
+            course.text_set.filter(published=True),
+            course.quiz_set.filter(published=True)
+            ), key=lambda step: step.order)
+    # -------Old queries-----
+    # course = get_object_or_404(models.Course, pk=pk, published=True)
+    # steps = sorted(chain(course.text_set.filter(published=True),
+    #                      course.quiz_set.filter(published=True)
+    #                      ),
+    #                key=lambda step: step.order)
     view_mode = 'userview'
     return render(request, 'courses/course_detail.html', {
         'course': course,
@@ -50,11 +77,26 @@ def text_detail(request, course_pk, step_pk):
 
 
 def quiz_detail(request, course_pk, step_pk):
-    quiz = get_object_or_404(models.Quiz,
-                             course_id=course_pk,
-                             pk=step_pk,
-                             course__published=True)
-    return render(request, 'courses/quiz_detail.html', {'step': quiz})
+    try:
+        step = models.Quiz.objects.select_related(
+            'course'
+        ).prefetch_related(
+            'question_set',
+            'question_set__answer_set',
+        ).get(
+            course_id=course_pk,
+            pk=step_pk,
+            course__published=True
+        )
+    except models.Quiz.DoesNotExist:
+        raise Http404
+    else:
+        return render(request, 'courses/quiz_detail.html', {'step': step})
+        # quiz = get_object_or_404(models.Quiz,
+        #                          course_id=course_pk,
+        #                          pk=step_pk,
+        #                          course__published=True)
+
 
 
 @login_required
@@ -235,7 +277,10 @@ def courses_by_teacher(request, teacher):
 
 
 def search(request):
-    term = request.GET.get('q')
-    courses = models.Course.objects.filter(title__icontains=term,
-                                           published=True)
+    term = request.GET.get('search')
+    courses = models.Course.objects.filter(
+        Q(title__icontains=term)|Q(description__icontains=term),
+        published=True
+    ).annotate(total_steps=Count('text', distinct=True)+Count('quiz', distinct=True)
+               )
     return render(request, 'courses/course_list.html', {'courses': courses})
