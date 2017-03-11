@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
+from django.template.defaultfilters import truncatechars
 
 
 # Create your models here.
@@ -14,6 +15,10 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+    def time_to_complite(self):
+        from courses.templatetags.course_extras import time_estimate
+        return time_estimate(len(self.description.split()))
 
 
 class Step(models.Model):
@@ -95,3 +100,7 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.text
+
+    @property
+    def short_question(self):
+        return truncatechars(self.question, 50)
