@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from itertools import chain
 from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import truncatechars
@@ -16,9 +17,12 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
-    def time_to_complite(self):
+    def time_to_complete(self):
         from courses.templatetags.course_extras import time_estimate
-        return time_estimate(len(self.description.split()))
+        return "{} min.".format(time_estimate(len(self.description.split())))
+
+    def total_steps(self):
+        return Text.objects.filter(course=self).count()+Quiz.objects.filter(course=self).count()
 
 
 class Step(models.Model):
@@ -31,7 +35,7 @@ class Step(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['order',]
+        ordering = ['order', ]
 
     def __str__(self):
         return self.title
@@ -70,7 +74,7 @@ class Question(models.Model):
     published = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['order',]
+        ordering = ['order', ]
 
     def get_absolute_url(self):
             return self.quiz.get_absolute_url()
@@ -94,9 +98,8 @@ class Answer(models.Model):
     correct = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
 
-
     class Meta:
-        ordering = ['order',]
+        ordering = ['order', ]
 
     def __str__(self):
         return self.text

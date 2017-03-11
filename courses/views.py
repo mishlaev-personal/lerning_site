@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
 from django.contrib import messages
-from django.db.models import Q, Count, Sum, Case, When
+from django.db.models import Q, F, Count, Sum, When, Case, IntegerField
 
 from . import forms
 from . import models
@@ -14,11 +14,13 @@ def course_list(request):
         published=True
     ).annotate(
         total_steps=Count(
-            'text',
-            distinct=True
-        )+Count(
-            'quiz',
-            distinct=True
+            Case(When(text__published=True, then=F('text__id')),
+                 output_field=IntegerField(),
+                 ), distinct=True
+        ) + Count(
+            Case(When(quiz__published=True, then=F('quiz__id')),
+                 output_field=IntegerField(),
+                 ), distinct=True
         )
     )
     total = courses.aggregate(total=Sum('total_steps'))
@@ -39,7 +41,7 @@ def course_detail(request, pk):
         steps = sorted(chain(
             course.text_set.filter(published=True),
             course.quiz_set.filter(published=True)
-            ), key=lambda step: step.order)
+        ), key=lambda step: step.order)
     # -------Old queries-----
     # course = get_object_or_404(models.Course, pk=pk, published=True)
     # steps = sorted(chain(course.text_set.filter(published=True),
@@ -96,7 +98,6 @@ def quiz_detail(request, course_pk, step_pk):
         #                          course_id=course_pk,
         #                          pk=step_pk,
         #                          course__published=True)
-
 
 
 @login_required
@@ -279,8 +280,8 @@ def courses_by_teacher(request, teacher):
 def search(request):
     term = request.GET.get('search')
     courses = models.Course.objects.filter(
-        Q(title__icontains=term)|Q(description__icontains=term),
+        Q(title__icontains=term) | Q(description__icontains=term),
         published=True
-    ).annotate(total_steps=Count('text', distinct=True)+Count('quiz', distinct=True)
+    ).annotate(total_steps=Count('text', distinct=True) + Count('quiz', distinct=True)
                )
     return render(request, 'courses/course_list.html', {'courses': courses})

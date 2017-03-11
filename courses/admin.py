@@ -35,8 +35,16 @@ class YearListFilter(admin.SimpleListFilter):
 class CourseAdmin(admin.ModelAdmin):
     inlines = [TextInline, QuizInline]
     search_fields = ['title', 'description']
-    list_filter = ['created_at', 'published', YearListFilter]
-    list_display = ['title', 'published', 'teacher', 'subject', 'time_to_complite', 'created_at']
+    list_filter = ['created_at', 'published', YearListFilter, 'teacher', 'subject']
+    list_display = [
+        'title',
+        'published',
+        'teacher',
+        'subject',
+        'time_to_complete',
+        'total_steps',
+        'created_at'
+        ]
     list_editable = ['published', 'teacher', 'subject']
 
 
