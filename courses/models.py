@@ -4,6 +4,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import truncatechars
 
+STATUS_CHOICES = (
+    ('i', 'In Progress'),
+    ('r', 'In Preview'),
+    ('p', 'Published'),
+)
+
 
 # Create your models here.
 class Course(models.Model):
@@ -13,6 +19,7 @@ class Course(models.Model):
     teacher = models.ForeignKey(User)
     subject = models.CharField(default='', max_length=100)
     published = models.BooleanField(default=False)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='i')
 
     def __str__(self):
         return self.title

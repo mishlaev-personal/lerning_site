@@ -5,12 +5,42 @@ from datetime import date
 from . import models
 
 
+def make_published(self, request, queryset):
+    rows_updated = queryset.update(status='p', published=True)
+    rows_updated_message(self, request, rows_updated)
+
+
+def make_in_review(self, request, queryset):
+    rows_updated = queryset.update(status='r', published=False)
+    rows_updated_message(self, request, rows_updated)
+
+
+def make_in_progress(self, request, queryset):
+    rows_updated = queryset.update(status='i', published=False)
+    rows_updated_message(self, request, rows_updated)
+
+
+def rows_updated_message(self, request, rows_updated):
+    if rows_updated == 1:
+        message_bit = "1 story was"
+    else:
+        message_bit = "%s courses were" % rows_updated
+    self.message_user(request, "%s successfully updated." % message_bit)
+
+
+make_published.short_description = 'Mark selected as Published'
+
+
 class TextInline(admin.StackedInline):
     model = models.Text
 
 
 class QuizInline(admin.StackedInline):
     model = models.Quiz
+
+
+class AnswerTabed(admin.TabularInline):
+    model = models.Answer
 
 
 class YearListFilter(admin.SimpleListFilter):
@@ -43,17 +73,28 @@ class CourseAdmin(admin.ModelAdmin):
         'subject',
         'time_to_complete',
         'total_steps',
-        'created_at'
+        'status'
         ]
-    list_editable = ['published', 'teacher', 'subject']
+    list_editable = ['teacher', 'subject', 'status']
+    actions = [make_published, make_in_progress, make_in_review]
 
 
 class TextAdmin(admin.ModelAdmin):
-    fields = ['course', 'title', 'published', 'order', 'description', 'content']
+    # fields = ['course', 'title', 'published', 'order', 'description', 'content']
+    fieldsets = (
+        (None, {
+            'fields': ('course', 'title', 'published', 'order', 'description',)
+        }),
+        ('Add content', {
+            'fields':  ('content',),
+            'classes': ('collapse',)
+        })
+    )
     search_fields = ['title', 'description']
     list_filter = ['course', 'published']
     list_display = ['title', 'course', 'published']
-    list_display_links = ['course']
+    list_display_links = ['title', 'course']
+    radio_fields = {'course': admin.HORIZONTAL}
 
 
 class QuizAdmin(admin.ModelAdmin):
@@ -64,18 +105,19 @@ class QuizAdmin(admin.ModelAdmin):
     list_display_links = ['course']
 
 
-class AnswerAdmin(admin.ModelAdmin):
-    list_filter = ['question', 'published']
-    list_display = ['text', 'correct', 'short_question', 'published']
-    list_display_links = ['short_question']
-    list_editable = ['text', 'correct']
+class QuestionAdmin(admin.ModelAdmin):
+    inlines = [AnswerTabed,]
+    list_filter = ['quiz', 'published']
+    search_fields = ['prompt']
+    list_display = ['prompt', 'quiz', 'order']
+    list_editable = ['quiz', 'order']
 
 admin.site.register(models.Course, CourseAdmin)
 admin.site.register(models.Text, TextAdmin)
 admin.site.register(models.Quiz, QuizAdmin)
-admin.site.register(models.MultipleChoiceQuestion)
-admin.site.register(models.TrueFalseQuestion)
-admin.site.register(models.Answer, AnswerAdmin)
+admin.site.register(models.MultipleChoiceQuestion, QuestionAdmin)
+admin.site.register(models.TrueFalseQuestion, QuestionAdmin)
+admin.site.register(models.Answer)
 
 
 admin.site.site_header = "Learning Site administration"
